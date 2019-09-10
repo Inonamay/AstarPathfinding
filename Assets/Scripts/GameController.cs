@@ -50,13 +50,8 @@ public class GameController : MonoBehaviour
                {
                   switch (positionsSet)
                   {
-                     case 0: startPos = hit.collider.gameObject; startPos.GetComponent<MeshRenderer>().material.color = Color.green;
-                             gValuePulseOrder.Add(startPos.GetComponent<FloorScript>());
-                             break;
-                     case 1:
-                             finishPos = hit.collider.gameObject; finishPos.GetComponent<MeshRenderer>().material.color = Color.yellow;
-                             hValuePulseOrder.Add(finishPos.GetComponent<FloorScript>()); 
-                             break;
+                     case 0: startPos = hit.collider.gameObject; startPos.GetComponent<MeshRenderer>().material.color = Color.green;break;
+                     case 1: finishPos = hit.collider.gameObject; finishPos.GetComponent<MeshRenderer>().material.color = Color.yellow; break;
                   }
                   positionsSet++;
                }
@@ -74,6 +69,7 @@ public class GameController : MonoBehaviour
     }
     IEnumerator CalulateHValue()
     {
+        hValuePulseOrder.Add(finishPos.GetComponent<FloorScript>());
         hValuePulseOrder[0].SetPulseH();
         while(hValuePulseOrder.Count != 0)
         {
@@ -85,7 +81,8 @@ public class GameController : MonoBehaviour
     }
     IEnumerator CalulateGValue()
     {
-        if(gValuePulseOrder[0] != null)
+        gValuePulseOrder.Add(startPos.GetComponent<FloorScript>());
+        if (gValuePulseOrder[0] != null)
         { gValuePulseOrder[0].SetPulseG();}
         while (gValuePulseOrder.Count != 0)
         {
