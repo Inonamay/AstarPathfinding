@@ -61,6 +61,7 @@ public class GameController : MonoBehaviour
         if (positionsSet == 2)
         { Instantiate(computerCharacter); positionsSet++; }
     }
+    //A method sending out a pulse from start and finish through all the searched tiles and changes their value to the correct value
     public void CalculateValues()
     {
         startPos.GetComponent<FloorScript>().GetComponent<MeshRenderer>().material.color = Color.blue;
@@ -68,28 +69,33 @@ public class GameController : MonoBehaviour
         StartCoroutine("CalulateHValue");
         StartCoroutine("CalulateGValue");
     }
+    //Makes sure that no tile gets the wrong value by making sure every tile changes themselves in the correct order
     IEnumerator CalulateHValue()
     {
+        int x = 0;
         hValuePulseOrder.Add(finishPos.GetComponent<FloorScript>());
         hValuePulseOrder[0].SetPulseH();
         while(hValuePulseOrder.Count != 0)
         {
+            x++;
             hValuePulseOrder[0].SendHValuePulse();
             hValuePulseOrder.RemoveAt(0);
-            yield return null;
+            if (x % 50 == 0) { yield return null; }
         }
         finishedH = true;
     }
     IEnumerator CalulateGValue()
     {
+        int x = 0;
         gValuePulseOrder.Add(startPos.GetComponent<FloorScript>());
         if (gValuePulseOrder[0] != null)
         { gValuePulseOrder[0].SetPulseG();}
         while (gValuePulseOrder.Count != 0)
         {
+            x++;
             gValuePulseOrder[0].SendGValuePulse();
             gValuePulseOrder.RemoveAt(0);
-            yield return null;
+            if (x % 50 == 0) { yield return null; }
         }
         finishedG = true;
     }

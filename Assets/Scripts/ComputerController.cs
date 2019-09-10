@@ -23,11 +23,13 @@ public class ComputerController : MonoBehaviour
     }
     IEnumerator PathFind()
     {
+        //The x variable is to optimse so that the computer searches multiple tiles every frame
         int x = 0;
         bool b = true;
         while (b)
         {
             x++;
+            //The computer searches until it arrives at the finish tile then it switches over to the mode where it sets up all the tiles with the correct values and shows the shortest route it found
             if (currentTileScript.gameObject != gameControllerScript.GetFinish())
             {
                 currentTileScript = FindClosestTile();
@@ -44,7 +46,7 @@ public class ComputerController : MonoBehaviour
                 gameControllerScript.CalculateValues();
                 if(x % 50 == 0) { yield return null; }
                 for (int i = 0; i < openList.Count; i++)
-                { openList[i].SetGValue(20000); }
+                { openList[i].SetGValue(99999); }
                 if (gameControllerScript.IsFinishedCalculating())
                 {
                     currentTileScript = gameControllerScript.GetStart().GetComponent<FloorScript>();
@@ -58,7 +60,6 @@ public class ComputerController : MonoBehaviour
     {
         openList.Remove(currentTileScript);
         closedList.Add(currentTileScript);
-        transform.position = currentTileScript.gameObject.transform.position - Vector3.forward;
     }
     IEnumerator ShowShortestPath()
     {

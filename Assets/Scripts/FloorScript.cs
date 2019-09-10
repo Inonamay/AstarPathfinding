@@ -18,6 +18,7 @@ public class FloorScript : MonoBehaviour
     #endregion
     GameController gc;
     List<FloorScript> connectedBlocks = new List<FloorScript>();
+    //Assigns all variables, changes the color of the tile and randomises whether the tile is a wall or not
     void Awake()
     {
         gc = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
@@ -26,11 +27,13 @@ public class FloorScript : MonoBehaviour
         passable = true;
         if(tileType == 1) { passable = false; gameObject.tag = "Wall"; }
     }
+    //When the computer checks the tiles around it it calls the calculate function which estimates the distance from that tile to the goal
     public void CalculateH()
     {
         distanceToGoalH = Mathf.RoundToInt(Mathf.Max(gc.GetFinish().transform.position.y - 0.5f, transform.position.y - 0.5f) - Mathf.Min(gc.GetFinish().transform.position.y - 0.5f, transform.position.y - 0.5f));
         distanceToGoalH += Mathf.RoundToInt(Mathf.Max(gc.GetFinish().transform.position.x - 0.5f, transform.position.x - 0.5f) - Mathf.Min(gc.GetFinish().transform.position.x - 0.5f, transform.position.x - 0.5f));
     }
+    //The pulses are sent when the computer has found the finishpoint and makes sure that all values are the correct ones
     public void SendHValuePulse()
     {
         ComputerController cc = GameObject.FindGameObjectWithTag("Player").GetComponent<ComputerController>();
@@ -60,6 +63,7 @@ public class FloorScript : MonoBehaviour
     }
     //Getters and Setters
     #region
+    public bool Passable { get { return passable; } set { passable = value; } }
     public void SetGValue(int i)
     { stepsTakenG = i; }
     public void SetHValue(int value)
@@ -70,10 +74,6 @@ public class FloorScript : MonoBehaviour
     { return distanceToGoalH; }
     public int GetDistance()
     {return stepsTakenG + distanceToGoalH;}
-    public bool GetPassabilityStatus()
-    {return passable; }
-    public void Setpassability(bool a)
-    {passable = a; }
     public bool GetPulseH()
     {return hasBeenPulsedH;}
     public bool GetPulseG()
@@ -87,6 +87,6 @@ public class FloorScript : MonoBehaviour
     public List<FloorScript> GetConnectedBlocks()
     { return connectedBlocks; }
     public void AddConnectedBlock(FloorScript target)
-    { if (target.GetPassabilityStatus()) { connectedBlocks.Add(target); } }
+    { if (target.passable) { connectedBlocks.Add(target); } }
     #endregion
 }
