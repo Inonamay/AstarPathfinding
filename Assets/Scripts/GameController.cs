@@ -24,6 +24,7 @@ public class GameController : MonoBehaviour
     #region
     bool finishedG = false;
     bool finishedH = false;
+    bool isGeneratingGrid;
     #endregion
     //Grid related variabels
     #region
@@ -40,7 +41,7 @@ public class GameController : MonoBehaviour
     {if(positionsSet < 3) {SettingPoints();}}
     void SettingPoints()
     {
-        if (Input.GetMouseButtonDown(0) && positionsSet < 2)
+        if (Input.GetMouseButtonDown(0) && positionsSet < 2 && !isGeneratingGrid)
         {
            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
            RaycastHit hit;
@@ -95,6 +96,7 @@ public class GameController : MonoBehaviour
     //Double for loop adding new tiles in a list with lists of gameobjects, the placing them correctly and set their parent to an empy gameobject so that they dont take up too much space in the hierarchy
     private IEnumerator GenerateGrid()
     {
+        isGeneratingGrid = true;
         coordinates = new List<List<GameObject>>();
         for (int y = 0; y < gridSizeY; y++)
         {
@@ -124,6 +126,7 @@ public class GameController : MonoBehaviour
             }
             yield return null;
         }
+        isGeneratingGrid = false;
     }
     //Getters and Setters
     #region

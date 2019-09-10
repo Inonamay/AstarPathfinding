@@ -24,7 +24,7 @@ public class FloorScript : MonoBehaviour
         tileType += Random.Range(1, gc.GetWallChance());
         GetComponent<MeshRenderer>().material.color = Color.grey;
         passable = true;
-        if(tileType == 1) { passable = false; }
+        if(tileType == 1) { passable = false; gameObject.tag = "Wall"; }
     }
     public void CalculateH()
     {

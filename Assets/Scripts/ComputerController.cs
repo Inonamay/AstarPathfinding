@@ -14,7 +14,7 @@ public class ComputerController : MonoBehaviour
     #endregion
     int steps = 0;
     GameObject finishTile;
-    // Start is called before the first frame update
+    // Sets the object correctly and sets up the variables
     void Start()
     {
         gameControllerScript = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
@@ -23,9 +23,11 @@ public class ComputerController : MonoBehaviour
     }
     IEnumerator PathFind()
     {
+        int x = 0;
         bool b = true;
         while (b)
         {
+            x++;
             if (currentTileScript.gameObject != gameControllerScript.GetFinish())
             {
                 currentTileScript = FindClosestTile();
@@ -33,20 +35,20 @@ public class ComputerController : MonoBehaviour
                 { StopAllCoroutines(); yield return null; }
                 UpdatePos();
                 //Uncomment to se the all the paths the computer takes or tries to take
-                currentTileScript.gameObject.GetComponent<MeshRenderer>().material.color = Color.red;
-                yield return null;
+                //currentTileScript.gameObject.GetComponent<MeshRenderer>().material.color = Color.red;
+                if(x % 50 == 0) { yield return null; }
             }
             else
             {
                 openList.Remove(gameControllerScript.GetStart().GetComponent<FloorScript>());
                 gameControllerScript.CalculateValues();
-                yield return null;
+                if(x % 50 == 0) { yield return null; }
                 for (int i = 0; i < openList.Count; i++)
                 { openList[i].SetGValue(20000); }
                 if (gameControllerScript.IsFinishedCalculating())
                 {
                     currentTileScript = gameControllerScript.GetStart().GetComponent<FloorScript>();
-                    InvokeRepeating("ShowShortestPath", 1, 0.01f);
+                    StartCoroutine("ShowShortestPath");
                     b = false;
                 }
             }
@@ -58,22 +60,28 @@ public class ComputerController : MonoBehaviour
         closedList.Add(currentTileScript);
         transform.position = currentTileScript.gameObject.transform.position - Vector3.forward;
     }
-    void ShowShortestPath()
+    IEnumerator ShowShortestPath()
     {
-        if(currentTileScript.gameObject != gameControllerScript.GetFinish())
+        int b = 0;
+        while (true)
         {
-            FloorScript tempScript = currentTileScript;
-            for (int i = 0; i < currentTileScript.GetConnectedBlocks().Count; i++)
+            b++;
+            if (currentTileScript.gameObject != gameControllerScript.GetFinish())
             {
-                if (tempScript.GetDistance() >= currentTileScript.GetConnectedBlocks()[i].GetDistance() && tempScript.GetGValue() < currentTileScript.GetConnectedBlocks()[i].GetGValue())
-                {tempScript = currentTileScript.GetConnectedBlocks()[i]; }
+                FloorScript tempScript = currentTileScript;
+                for (int i = 0; i < currentTileScript.GetConnectedBlocks().Count; i++)
+                {
+                    if (tempScript.GetDistance() >= currentTileScript.GetConnectedBlocks()[i].GetDistance() && tempScript.GetGValue() < currentTileScript.GetConnectedBlocks()[i].GetGValue())
+                    { tempScript = currentTileScript.GetConnectedBlocks()[i]; }
+                }
+                currentTileScript = tempScript;
+                currentTileScript.GetComponent<MeshRenderer>().material.color = Color.cyan;
+                transform.position = currentTileScript.gameObject.transform.position - Vector3.forward;
             }
-            currentTileScript = tempScript;
-            currentTileScript.GetComponent<MeshRenderer>().material.color = Color.cyan;
-            transform.position = currentTileScript.gameObject.transform.position - Vector3.forward;
+            else
+            { StopCoroutine("ShowShortestPath"); }
+            if(b % 50 == 0) {yield return null;}
         }
-        else
-        {CancelInvoke(); }
     }
     void ResetComputer()
     {
@@ -103,7 +111,7 @@ public class ComputerController : MonoBehaviour
             FloorScript tempScript = openList[0];
             for (int i = 0; i < openList.Count; i++)
             {
-                if (gameControllerScript.GetArea() > 2499)
+                if (gameControllerScript.GetArea() > 5624)
                 {
                     if (tempScript.GetDistance() >= openList[i].GetDistance() || tempScript.GetHValue() >= openList[i].GetHValue())
                     { tempScript = openList[i]; }
