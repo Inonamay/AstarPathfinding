@@ -236,8 +236,8 @@ MonoBehaviour:
     type: 3}
   computerCharacter: {fileID: 4619021508268541383, guid: 466fcbc7c3615ac45ba8c8794c71d64d,
     type: 3}
-  gridSizeX: 100
-  gridSizeY: 100
+  gridSizeX: 10
+  gridSizeY: 10
   wallChance: 5
 --- !u!4 &805544008
 Transform:

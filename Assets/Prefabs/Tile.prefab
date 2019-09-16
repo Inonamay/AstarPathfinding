@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4738799825451179824}
   - component: {fileID: 941883170553545463}
   - component: {fileID: 402897943965131990}
-  - component: {fileID: 190900454747543722}
+  - component: {fileID: 8767364139090684179}
   m_Layer: 0
   m_Name: Tile
   m_TagString: Floor
@@ -94,7 +94,7 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 14
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &190900454747543722
+--- !u!114 &8767364139090684179
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -103,6 +103,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 8876311564328724003}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea3a14e32d8e5f341ac68c812aca1f55, type: 3}
+  m_Script: {fileID: 11500000, guid: fa556aa1ba61c5e449d8593ca0349c8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  floorTile: {fileID: 0}
+  computerCharacter: {fileID: 0}
+  gridSizeX: 10
+  gridSizeY: 10
+  wallChance: 10

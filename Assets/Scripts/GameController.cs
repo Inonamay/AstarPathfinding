@@ -4,8 +4,7 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
-    //Objects used by the script
-    #region
+    #region Objects
     [SerializeField]
     GameObject floorTile = null;
     [SerializeField]
@@ -14,20 +13,17 @@ public class GameController : MonoBehaviour
     GameObject finishPos;
     GameObject tileParent;
     #endregion
-    //Lists
-    #region
+    #region Lists
     List<List<GameObject>> coordinates;
-    List<FloorScript> hValuePulseOrder = new List<FloorScript>();
-    List<FloorScript> gValuePulseOrder = new List<FloorScript>();
+    List<TileController> hValuePulseOrder = new List<TileController>();
+    List<TileController> gValuePulseOrder = new List<TileController>();
     #endregion
-    //Bools
-    #region
+    #region Bools
     bool finishedG = false;
     bool finishedH = false;
     bool isGeneratingGrid;
     #endregion
-    //Grid related variabels
-    #region
+    #region Grid Variables
     [SerializeField] int gridSizeX = 10;
     [SerializeField] int gridSizeY = 10;
     [SerializeField] int wallChance = 10;
@@ -35,46 +31,66 @@ public class GameController : MonoBehaviour
     #endregion
     //Creates the object that will be the parent to all the tiles and then executes the generate grid function to generate the grid
     void Start()
-    { tileParent = new GameObject("TileParent"); StartCoroutine("GenerateGrid"); }
+    {
+        tileParent = new GameObject("TileParent");
+        StartCoroutine(GenerateGrid());
+    }
     //Lets the user place the 2 points and then initializes the pathfinding
     private void Update()
-    {if(positionsSet < 3) {SettingPoints();}}
-    void SettingPoints()
+    { if (positionsSet < 3) {SetupConditions();} }
+    void SetupConditions()
     {
         if (Input.GetMouseButtonDown(0) && positionsSet < 2 && !isGeneratingGrid)
-        {
-           Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-           RaycastHit hit;
-           if (Physics.Raycast(ray, out hit))
-           {
-               if (hit.collider.tag == "Floor")
-               {
-                  switch (positionsSet)
-                  {
-                     case 0: startPos = hit.collider.gameObject; startPos.GetComponent<MeshRenderer>().material.color = Color.green;break;
-                     case 1: finishPos = hit.collider.gameObject; finishPos.GetComponent<MeshRenderer>().material.color = Color.yellow; break;
-                  }
-                  positionsSet++;
-               }
-           }
-        }
+        { SetPosition(); }
         if (positionsSet == 2)
-        { Instantiate(computerCharacter); positionsSet++; }
+        {
+            if (computerCharacter != null) { Instantiate(computerCharacter); }
+            else { print("Error: Computer object not assigned"); }
+            positionsSet++;
+        }
+    }
+    void SetPosition()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit))
+        {
+            if (hit.collider.tag == "Floor" && hit.collider.GetComponent<MeshRenderer>() != null && hit.collider.GetComponent<TileController>() != null)
+            {
+                switch (positionsSet)
+                {
+                    case 0:
+                        startPos = hit.collider.gameObject;
+                        startPos.GetComponent<MeshRenderer>().material.color = Color.green;
+                        break;
+                    case 1:
+                        finishPos = hit.collider.gameObject;
+                        finishPos.GetComponent<MeshRenderer>().material.color = Color.yellow;
+                        break;
+                }
+                positionsSet++;
+            }
+        }
     }
     //A method sending out a pulse from start and finish through all the searched tiles and changes their value to the correct value
     public void CalculateValues()
     {
-        startPos.GetComponent<FloorScript>().GetComponent<MeshRenderer>().material.color = Color.blue;
-        finishPos.GetComponent<FloorScript>().GetComponent<MeshRenderer>().material.color = Color.yellow;
-        StartCoroutine("CalulateHValue");
-        StartCoroutine("CalulateGValue");
+        if(startPos != null && finishPos != null)
+        {
+            startPos.GetComponent<MeshRenderer>().material.color = Color.blue;
+            finishPos.GetComponent<MeshRenderer>().material.color = Color.yellow;
+            StartCoroutine("CalulateHValue");
+            StartCoroutine("CalulateGValue");
+        }
+        else
+        { print("Error: There is no finish or start point set"); }
     }
     //Makes sure that no tile gets the wrong value by making sure every tile changes themselves in the correct order
-    IEnumerator CalulateHValue()
+    private IEnumerator CalulateHValue()
     {
         int x = 0;
-        hValuePulseOrder.Add(finishPos.GetComponent<FloorScript>());
-        hValuePulseOrder[0].SetPulseH();
+        hValuePulseOrder.Add(finishPos.GetComponent<TileController>());
+        hValuePulseOrder[0].SetPulsedHStatusTrue();
         while(hValuePulseOrder.Count != 0)
         {
             x++;
@@ -84,12 +100,12 @@ public class GameController : MonoBehaviour
         }
         finishedH = true;
     }
-    IEnumerator CalulateGValue()
+    private IEnumerator CalulateGValue()
     {
         int x = 0;
-        gValuePulseOrder.Add(startPos.GetComponent<FloorScript>());
+        gValuePulseOrder.Add(startPos.GetComponent<TileController>());
         if (gValuePulseOrder[0] != null)
-        { gValuePulseOrder[0].SetPulseG();}
+        { gValuePulseOrder[0].SetPulsedGStatusTrue();}
         while (gValuePulseOrder.Count != 0)
         {
             x++;
@@ -102,20 +118,36 @@ public class GameController : MonoBehaviour
     //Double for loop adding new tiles in a list with lists of gameobjects, the placing them correctly and set their parent to an empy gameobject so that they dont take up too much space in the hierarchy
     private IEnumerator GenerateGrid()
     {
-        isGeneratingGrid = true;
-        coordinates = new List<List<GameObject>>();
-        for (int y = 0; y < gridSizeY; y++)
+        GameObject[] duplicates = GameObject.FindGameObjectsWithTag("GameController");
+        for (int i = 0; i < duplicates.Length; i++)
         {
-            coordinates.Add(new List<GameObject>());
-            for (int x = 0; x < gridSizeX; x++)
+            if (duplicates[i] != gameObject)
             {
-                coordinates[y].Add(Instantiate(floorTile));
-                coordinates[y][x].transform.position = Vector3.up * (y + 0.5f) + Vector3.right * (x + 0.5f);
-                coordinates[y][x].transform.parent = tileParent.transform;
+                print("Warning! Found object with tag GameController: " + duplicates[i] + ". There should only be one object with the tag GameController");
+                duplicates[i].tag = "Untagged";
             }
-            yield return null;
         }
-        StartCoroutine("AddConnections");
+        if (floorTile != null)
+        {
+            isGeneratingGrid = true;
+            coordinates = new List<List<GameObject>>();
+            for (int y = 0; y < gridSizeY; y++)
+            {
+                coordinates.Add(new List<GameObject>());
+                for (int x = 0; x < gridSizeX; x++)
+                {CreateTile(y, x); }
+                yield return null;
+            }
+            StartCoroutine(AddConnections());
+        }
+        else { print("Error: Tile Object is not assigned"); }
+       
+    }
+    void CreateTile(int y, int x)
+    {
+        coordinates[y].Add(Instantiate(floorTile));
+        coordinates[y][x].transform.position = Vector3.up * (y + 0.5f) + Vector3.right * (x + 0.5f);
+        coordinates[y][x].transform.parent = tileParent.transform;
     }
     //Same as the generate grid function except it adds connections to the tiles so that every tile knows who is its neighbours (and sets their color for a nice curtain effect)
     private IEnumerator AddConnections()
@@ -124,38 +156,44 @@ public class GameController : MonoBehaviour
         {
             for (int x = 0; x < gridSizeX; x++)
             {
-                if(y > 0) { coordinates[y][x].GetComponent<FloorScript>().AddConnectedBlock(coordinates[y - 1][x].GetComponent<FloorScript>()); }
-                if (y < gridSizeY - 1) { coordinates[y][x].GetComponent<FloorScript>().AddConnectedBlock(coordinates[y + 1][x].GetComponent<FloorScript>()); }
-                if(x > 0) { coordinates[y][x].GetComponent<FloorScript>().AddConnectedBlock(coordinates[y][x - 1].GetComponent<FloorScript>()); }
-                if(x < gridSizeX - 1) { coordinates[y][x].GetComponent<FloorScript>().AddConnectedBlock(coordinates[y][x + 1].GetComponent<FloorScript>()); }
-                if (coordinates[y][x].GetComponent<FloorScript>().GetTileType() != 1) { coordinates[y][x].GetComponent<MeshRenderer>().material.color = Color.white; }
+                try
+                {
+                    if (y > 0)
+                    { coordinates[y][x].GetComponent<TileController>().AddConnectedBlock(coordinates[y - 1][x].GetComponent<TileController>()); }
+                    if (y < gridSizeY - 1)
+                    { coordinates[y][x].GetComponent<TileController>().AddConnectedBlock(coordinates[y + 1][x].GetComponent<TileController>()); }
+                    if (x > 0)
+                    { coordinates[y][x].GetComponent<TileController>().AddConnectedBlock(coordinates[y][x - 1].GetComponent<TileController>()); }
+                    if (x < gridSizeX - 1)
+                    { coordinates[y][x].GetComponent<TileController>().AddConnectedBlock(coordinates[y][x + 1].GetComponent<TileController>()); }
+                    if (coordinates[y][x].GetComponent<TileController>().GetTileType() != 1)
+                    { coordinates[y][x].GetComponent<MeshRenderer>().material.color = Color.white; }
+                }
+                catch { print("Error: The tile object being created does not have the necessary component: TileController"); }
             }
             yield return null;
         }
         isGeneratingGrid = false;
     }
-    //Getters and Setters
-    #region
-    public void AddHValueCalcOrder(FloorScript target)
-    { hValuePulseOrder.Add(target);}
-    public void AddGValueCalcOrder(FloorScript target)
+    #region Getters and Setters
+    public void AddHValueCalcOrder(TileController target)
+    { hValuePulseOrder.Add(target); }
+    public void AddGValueCalcOrder(TileController target)
     { gValuePulseOrder.Add(target); }
     public List<List<GameObject>> GetCoordinates()
-    {return coordinates;}
+    { return coordinates; }
     public GameObject GetStart()
-    {return startPos;}
+    { return startPos; }
     public GameObject GetFinish()
-    { return finishPos;}
+    { return finishPos; }
     public bool IsFinishedCalculating()
     {
-        if(finishedG && finishedH) { return true; }
+        if(finishedG && finishedH){return true;}
         else { return false; }
     }
     public int GetWallChance()
-    {return wallChance;}
+    { return wallChance; }
     public float GetArea()
-    {
-        return gridSizeX * gridSizeY;
-    }
+    { return gridSizeX * gridSizeY; }
     #endregion
 }
