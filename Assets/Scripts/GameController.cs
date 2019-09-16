@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour
 {
@@ -32,12 +33,20 @@ public class GameController : MonoBehaviour
     //Creates the object that will be the parent to all the tiles and then executes the generate grid function to generate the grid
     void Start()
     {
+        if (gridSizeX > 150) { gridSizeX = 100; }
+        if (gridSizeY > 150) { gridSizeY = 100; }
+        Camera mainCam = Camera.main;
+        mainCam.orthographicSize = Mathf.Max(gridSizeY * 0.5f, gridSizeX * 0.29f);
+        mainCam.transform.position = new Vector3(gridSizeX * 0.5f, gridSizeY * 0.5f, -10);
         tileParent = new GameObject("TileParent");
         StartCoroutine(GenerateGrid());
     }
     //Lets the user place the 2 points and then initializes the pathfinding
     private void Update()
-    { if (positionsSet < 3) {SetupConditions();} }
+    {
+        if (positionsSet < 3) { SetupConditions(); }
+        if (Input.GetKeyDown(KeyCode.Return)) { SceneManager.LoadScene(0); }
+    }
     void SetupConditions()
     {
         if (Input.GetMouseButtonDown(0) && positionsSet < 2 && !isGeneratingGrid)
@@ -143,6 +152,7 @@ public class GameController : MonoBehaviour
         else { print("Error: Tile Object is not assigned"); }
        
     }
+    //Creates the tile and places it in the correct position
     void CreateTile(int y, int x)
     {
         coordinates[y].Add(Instantiate(floorTile));
