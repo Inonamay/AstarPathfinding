@@ -10,7 +10,7 @@ public class TileController : MonoBehaviour
     bool hasBeenPulsedG = false;
     #endregion
     #region Ints
-    int distanceToGoalH = 0;
+    [SerializeField]int distanceToGoalH = 0;
     int stepsTakenG = 0;
     int tileType = 0;
     #endregion

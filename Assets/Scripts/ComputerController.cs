@@ -19,12 +19,21 @@ public class ComputerController : MonoBehaviour
     // Sets the object correctly and sets up the variables
     void Start()
     {
+        GameObject[] duplicates = GameObject.FindGameObjectsWithTag(gameObject.tag);
+        for (int i = 0; i < duplicates.Length; i++)
+        {
+            if (duplicates[i] != gameObject)
+            {
+                print("Warning! Found object with tag GameController: " + duplicates[i].name + ". There should only be one object with the tag " + gameObject.tag);
+                duplicates[i].tag = "Untagged";
+            }
+        }
         try
         {
             gameControllerScript = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
             start = gameControllerScript.GetStart().GetComponent<TileController>();
             ResetComputer();
-            StartCoroutine("PathFind");
+            StartCoroutine(PathFind());
         }
         catch
         { print("Error: Something went wrong with the computer, possible errors: Game Controller does not have the necessary tag (GameController), Gamecontroller does not have the necessary script, Gamecontroller does not contain a definition for a start tile");}
@@ -55,7 +64,7 @@ public class ComputerController : MonoBehaviour
                 if (gameControllerScript.IsFinishedCalculating())
                 {
                     currentTileScript = start;
-                    StartCoroutine("ShowShortestPath");
+                    StartCoroutine(ShowShortestPath());
                     break;
                 }
             }

@@ -35,6 +35,8 @@ public class GameController : MonoBehaviour
     {
         if (gridSizeX > 150) { gridSizeX = 100; }
         if (gridSizeY > 150) { gridSizeY = 100; }
+        if (gridSizeX < 2) { gridSizeX = 2; }
+        if (gridSizeY < 2) { gridSizeY = 2; }
         Camera mainCam = Camera.main;
         mainCam.orthographicSize = Mathf.Max(gridSizeY * 0.5f, gridSizeX * 0.29f);
         mainCam.transform.position = new Vector3(gridSizeX * 0.5f, gridSizeY * 0.5f, -10);
@@ -58,6 +60,7 @@ public class GameController : MonoBehaviour
             positionsSet++;
         }
     }
+    //Sets the start and finish tiles via rays then spawns the computer
     void SetPosition()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -127,12 +130,12 @@ public class GameController : MonoBehaviour
     //Double for loop adding new tiles in a list with lists of gameobjects, the placing them correctly and set their parent to an empy gameobject so that they dont take up too much space in the hierarchy
     private IEnumerator GenerateGrid()
     {
-        GameObject[] duplicates = GameObject.FindGameObjectsWithTag("GameController");
+        GameObject[] duplicates = GameObject.FindGameObjectsWithTag(gameObject.tag);
         for (int i = 0; i < duplicates.Length; i++)
         {
             if (duplicates[i] != gameObject)
             {
-                print("Warning! Found object with tag GameController: " + duplicates[i] + ". There should only be one object with the tag GameController");
+                print("Warning! Found object with tag GameController: " + duplicates[i].name + ". There should only be one object with the tag " + gameObject.tag);
                 duplicates[i].tag = "Untagged";
             }
         }
@@ -150,7 +153,6 @@ public class GameController : MonoBehaviour
             StartCoroutine(AddConnections());
         }
         else { print("Error: Tile Object is not assigned"); }
-       
     }
     //Creates the tile and places it in the correct position
     void CreateTile(int y, int x)
