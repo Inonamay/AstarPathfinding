@@ -106,4 +106,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 285c274bafecd8b4884f545354d65761, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showTestedTiles: 0
+  showTestedTiles: 1
+  thresholdForSearchMethod: 5600

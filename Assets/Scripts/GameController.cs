@@ -136,6 +136,7 @@ public class GameController : MonoBehaviour
             if (duplicates[i] != gameObject)
             {
                 print("Warning! Found object with tag GameController: " + duplicates[i].name + ". There should only be one object with the tag " + gameObject.tag);
+                if(duplicates[i].GetComponent<GameController>() != null) { Destroy(duplicates[i].GetComponent<GameController>()); }
                 duplicates[i].tag = "Untagged";
             }
         }
